@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import re
 from os.path import exists
 import glob
+import argparse
 
 def get_events(input_file, parse_xml=False):
     """Opens a Windows Event Log and returns XML information from
@@ -29,10 +30,17 @@ def get_events(input_file, parse_xml=False):
                 yield record.xml()
 
 def main():
-    if not exists(r"C:\Windows\System32\winevt\Logs"):
-        print("Path Windows\System32\Winevt\Logs doesn't exist")
+    parser = argparse.ArgumentParser(description="Scraping *.evtx files",epilog="Usage: LogParser.py -f <folder>")
+    parser.add_argument("folder",help="Path to evtx files")
+    parser.add_argument("-f","--folder",help="Folder where are evtx logs")
+    args = parser.parse_args()
+    folder = args.folder
+
+    if not exists(folder):
+        print("Path {} doesn't exist".format(folder))
         return 0
-    for eventFile in glob.glob(r"C:\Windows\System32\winevt\Logs\*.evtx"):
+    #"C:\Windows\System32\winevt\Logs\*.evtx
+    for eventFile in glob.glob(folder + "\\" "*.evtx"):
         print(eventFile)
         for event_xml in enumerate(get_events(eventFile)):
             root = ET.fromstring(event_xml[1])
@@ -44,5 +52,6 @@ def main():
                     else:
                         print(tag,child.text)
             print("\n")
+
 if __name__=="__main__":
     main()
